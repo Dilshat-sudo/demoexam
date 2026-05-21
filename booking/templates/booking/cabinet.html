@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Личный кабинет</title>
+</head>
+<body>
+    <h1>Личный кабинет</h1>
+    <h2>{{ user.full_name }}</h2>
+    <p>Логин: {{ user.username }} | Email: {{ user.email }} | Телефон: {{ user.phone }}</p>
+
+    <p>
+        <a href="{% url 'create' %}">Создать заявку</a> |
+        <a href="/admin/">Админ-панель</a> |
+        <a href="{% url 'logout' %}">Выйти</a>
+    </p>
+
+    <hr>
+
+    <h3>Мои заявки</h3>
+
+    {% if messages %}
+        {% for msg in messages %}
+            <p style="color: green;">{{ msg }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if bookings %}
+        <table border="1" cellpadding="8">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Помещение</th>
+                    <th>Дата</th>
+                    <th>Оплата</th>
+                    <th>Статус</th>
+                    <th>Отзыв</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr>
+                    <td>{{ b.id }}</td>
+                    <td>{{ b.room.name }} ({{ b.room.get_room_type_display }})</td>
+                    <td>{{ b.date }}</td>
+                    <td>{{ b.get_payment_display }}</td>
+                    <td>
+                        {% if b.status == 'new' %}Новая
+                        {% elif b.status == 'scheduled' %}Мероприятие назначено
+                        {% else %}Мероприятие завершено{% endif %}
+                    </td>
+                    <td>
+                        {% if b.review %}
+                            {{ b.review }}
+                        {% elif b.status == 'completed' %}
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                <textarea name="review" rows="2" cols="30"></textarea>
+                                <br>
+                                <button type="submit">Оставить отзыв</button>
+                            </form>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>У вас нет заявок</p>
+    {% endif %}
+</body>
+</html>

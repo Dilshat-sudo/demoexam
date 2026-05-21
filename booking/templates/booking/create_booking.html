@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Новая заявка</title>
+</head>
+<body>
+    <h1>Создание заявки</h1>
+
+    <p><a href="{% url 'cabinet' %}">Назад в кабинет</a></p>
+
+    <h3>Доступные помещения:</h3>
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Тип</th>
+                <th>Вместимость</th>
+                <th>Цена/час</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for room in rooms %}
+            <tr>
+                <td>{{ room.name }}</td>
+                <td>{{ room.get_room_type_display }}</td>
+                <td>{{ room.capacity }}</td>
+                <td>{{ room.price }} руб</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Форма бронирования:</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Отправить</button>
+    </form>
+</body>
+</html>
