@@ -12,11 +12,12 @@
 </div>
 
 <h2>Галерея</h2>
-<div style="text-align: center;">
-    <img id="slideshow" src="{% static 'images/slide1.jpg' %}" style="width: 100%; height: 200px; object-fit: cover;">
-    <br>
-    <button onclick="prevSlide()" style="margin-top: 10px;"><</button>
-    <button onclick="nextSlide()" style="margin-top: 10px;">></button>
+<div class="slider-wrapper">
+    <img id="slideshow" class="slider-image" src="{% static 'images/slide1.jpg' %}" alt="Слайд">
+    <div class="slider-buttons">
+        <button class="slider-btn" onclick="prevSlide()"><</button>
+        <button class="slider-btn" onclick="nextSlide()">></button>
+    </div>
 </div>
 
 <h2>История заявок</h2>
