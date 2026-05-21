@@ -1,35 +1,34 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Личный кабинет</title>
-</head>
-<body>
-    <h1>Личный кабинет</h1>
-    <h2>{{ user.full_name }}</h2>
-    <p>Логин: {{ user.username }} | Email: {{ user.email }} | Телефон: {{ user.phone }}</p>
+{% extends 'booking/base.html' %}
+{% load static %}
 
-    <p>
-        <a href="{% url 'create' %}">Создать заявку</a> |
-        <a href="/admin/">Админ-панель</a> |
-        <a href="{% url 'logout' %}">Выйти</a>
-    </p>
+{% block content %}
+<h1 class="text-center">Личный кабинет</h1>
 
-    <hr>
+<div class="card p-3 mb-4">
+    <h3>{{ user.full_name }}</h3>
+    <p class="mb-1">Логин: {{ user.username }}</p>
+    <p class="mb-1">Email: {{ user.email }}</p>
+    <p class="mb-0">Телефон: {{ user.phone }}</p>
+</div>
 
-    <h3>Мои заявки</h3>
+<h2>Галерея</h2>
+<div style="text-align: center;">
+    <img id="slideshow" src="{% static 'images/slide1.jpg' %}" style="width: 100%; height: 200px; object-fit: cover;">
+    <br>
+    <button onclick="prevSlide()" style="margin-top: 10px;"><</button>
+    <button onclick="nextSlide()" style="margin-top: 10px;">></button>
+</div>
 
-    {% if messages %}
-        {% for msg in messages %}
-            <p style="color: green;">{{ msg }}</p>
-        {% endfor %}
-    {% endif %}
+<h2>История заявок</h2>
 
-    {% if bookings %}
-        <table border="1" cellpadding="8">
+{% if bookings %}
+    <div class="table-responsive">
+        <table class="table">
             <thead>
                 <tr>
                     <th>ID</th>
                     <th>Помещение</th>
+                    <th>Тип</th>
                     <th>Дата</th>
                     <th>Оплата</th>
                     <th>Статус</th>
@@ -37,38 +36,90 @@
                 </tr>
             </thead>
             <tbody>
-                {% for b in bookings %}
+                {% for booking in bookings %}
                 <tr>
-                    <td>{{ b.id }}</td>
-                    <td>{{ b.room.name }} ({{ b.room.get_room_type_display }})</td>
-                    <td>{{ b.date }}</td>
-                    <td>{{ b.get_payment_display }}</td>
-                    <td>
-                        {% if b.status == 'new' %}Новая
-                        {% elif b.status == 'scheduled' %}Мероприятие назначено
-                        {% else %}Мероприятие завершено{% endif %}
+                    <td>{{ booking.id }}</td>
+                    <td>{{ booking.room.name }}</td>
+                    <td>{{ booking.room.get_room_type_display }}</td>
+                    <td>{{ booking.date|date:"d.m.Y H:i" }}</td>
+                    <td>{{ booking.get_payment_display }}</td>
+                    <td class="status-{{ booking.status }}">
+                        {% if booking.status == 'new' %}Новая
+                        {% elif booking.status == 'scheduled' %}Назначено
+                        {% else %}Завершено{% endif %}
                     </td>
                     <td>
-                        {% if b.review %}
-                            {{ b.review }}
-                        {% elif b.status == 'completed' %}
-                            <form method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="booking_id" value="{{ b.id }}">
-                                <textarea name="review" rows="2" cols="30"></textarea>
-                                <br>
-                                <button type="submit">Оставить отзыв</button>
-                            </form>
+                        {% if booking.review %}
+                            {{ booking.review }}
+                        {% elif booking.status == 'completed' %}
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#reviewModal{{ booking.id }}">
+                                Отзыв
+                            </button>
+
+                            <div class="modal fade" id="reviewModal{{ booking.id }}">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Отзыв</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                                <textarea name="review" class="form-control" rows="4" placeholder="Ваш отзыв"></textarea>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                <button type="submit" class="btn btn-primary">Отправить</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         {% else %}
-                            —
+                            -
                         {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-    {% else %}
-        <p>У вас нет заявок</p>
-    {% endif %}
-</body>
-</html>
+    </div>
+{% else %}
+    <div class="alert alert-info text-center">
+        <p>У вас пока нет заявок</p>
+        <a href="{% url 'create' %}" class="btn btn-primary mt-2">Создать заявку</a>
+    </div>
+{% endif %}
+
+<!--JS скрипт для слайдера-->
+<script>
+    let images = [
+        "{% static 'images/slide1.jpg' %}",
+        "{% static 'images/slide2.jpg' %}",
+        "{% static 'images/slide3.jpg' %}",
+        "{% static 'images/slide4.jpg' %}"
+    ];
+    let current = 0;
+
+    function showImage(n) {
+        current = n;
+        if (current >= images.length) current = 0;
+        if (current < 0) current = images.length - 1;
+        document.getElementById('slideshow').src = images[current];
+    }
+
+    function nextSlide() {
+        current++;
+        showImage(current);
+    }
+
+    function prevSlide() {
+        current--;
+        showImage(current);
+    }
+
+    setInterval(nextSlide, 3000);
+</script>
+{% endblock %}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конференции.РФ</title>
+    {% load django_bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% load static %}
+    <style>
+        :root {
+            --main-gray: #343A40;
+            --light-gray: #CED4DA;
+            --green: #28A745;
+            --white: #FFFFFF;
+        }
+
+        body {
+            font-family: Roboto, Arial, sans-serif;
+            background-color: var(--light-gray);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--white);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                max-width: 100%;
+                margin: 0;
+            }
+            .content-wrapper {
+                max-width: 390px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .content-wrapper {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--main-gray);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--main-gray);
+            margin-bottom: 15px;
+            margin-top: 20px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--main-gray);
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 16px;
+            color: var(--main-gray);
+        }
+
+        .btn-primary {
+            background-color: var(--green);
+            border-color: var(--green);
+        }
+
+        .btn-primary:hover {
+            background-color: #218838;
+        }
+
+        .btn-outline-primary {
+            color: var(--green);
+            border-color: var(--green);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--green);
+            color: white;
+        }
+
+        .form-control, .form-select {
+            border-radius: 5px;
+            border: 1px solid var(--light-gray);
+            padding: 8px 12px;
+            width: 100%;
+        }
+
+        .errorlist {
+            color: red;
+            font-size: 12px;
+            list-style: none;
+            margin-top: 5px;
+        }
+
+        .card {
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            background-color: white;
+        }
+
+        .navbar {
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--white);
+            border-top: 1px solid var(--light-gray);
+            padding: 10px 0;
+        }
+
+        .bottom-nav a {
+            color: var(--main-gray);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .pb-bottom-nav {
+            padding-bottom: 70px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--light-gray);
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--main-gray);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .bottom-nav a {
+                font-size: 12px;
+            }
+            .pb-bottom-nav {
+                padding-bottom: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <nav class="navbar navbar-light bg-white px-3 py-2">
+            <div class="content-wrapper" style="width: 100%;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <a class="navbar-brand" href="{% url 'cabinet' %}">
+                        <img src="{% static 'images/logo.png' %}" alt="Конференции.РФ" style="height: 40px; width: auto;">
+                    </a>
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            {{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'cabinet' %}">Личный кабинет</a></li>
+                            <li><a class="dropdown-item" href="{% url 'create' %}">Создать заявку</a></li>
+                            {% if user.is_superuser %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/">Панель администратора</a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Выход</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <div class="content-wrapper">
+            <main class="p-3 pb-bottom-nav">
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="bottom-nav">
+            <div class="content-wrapper">
+                <div class="d-flex justify-content-around">
+                    <a href="{% url 'cabinet' %}">Главная</a>
+                    <a href="{% url 'create' %}">Создать заявку</a>
+                    <a href="{% url 'logout' %}">Выход</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

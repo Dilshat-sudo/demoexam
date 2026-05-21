@@ -1,23 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Регистрация</title>
-</head>
-<body>
-    <h1>Регистрация</h1>
+{% extends 'booking/base.html' %}
 
-    {% if messages %}
-        {% for msg in messages %}
-            <p style="color: red;">{{ msg }}</p>
-        {% endfor %}
-    {% endif %}
+{% block content %}
+<h1 class="text-center">Регистрация</h1>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Зарегистрироваться</button>
-    </form>
+<form method="post">
+    {% csrf_token %}
 
-    <p><a href="{% url 'login' %}">Уже есть аккаунт? Войти</a></p>
-</body>
-</html>
+    <div class="mb-3">
+        <label>Логин (мин. 6 символов, буквы и цифры)</label>
+        <input type="text" name="username" class="form-control" required>
+        {% if form.username.errors %}
+        <div class="errorlist">{{ form.username.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label>ФИО</label>
+        <input type="text" name="full_name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Телефон</label>
+        <input type="tel" name="phone" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Пароль (мин. 8 символов)</label>
+        <input type="password" name="password1" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label>Подтверждение</label>
+        <input type="password" name="password2" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+</form>
+
+<p class="text-center mt-3"><a href="{% url 'login' %}">Уже есть аккаунт? Войти</a></p>
+{% endblock %}

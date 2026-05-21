@@ -1,40 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Новая заявка</title>
-</head>
-<body>
-    <h1>Создание заявки</h1>
+{% extends 'booking/base.html' %}
 
-    <p><a href="{% url 'cabinet' %}">Назад в кабинет</a></p>
+{% block content %}
+<h1 class="text-center">Новая заявка</h1>
 
-    <h3>Доступные помещения:</h3>
-    <table border="1" cellpadding="5">
-        <thead>
-            <tr>
-                <th>Название</th>
-                <th>Тип</th>
-                <th>Вместимость</th>
-                <th>Цена/час</th>
-            </tr>
-        </thead>
-        <tbody>
+<h2>Доступные помещения</h2>
+{% for room in rooms %}
+<div class="card mb-2 p-2">
+    <h3>{{ room.name }}</h3>
+    <p class="small-text">{{ room.get_room_type_display }} | {{ room.capacity }} мест</p>
+    <p><strong>{{ room.price }} руб/час</strong></p>
+</div>
+{% endfor %}
+
+<h2>Форма бронирования</h2>
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="mb-3">
+        <label class="form-label">Помещение</label>
+        <select name="room" class="form-select" required>
+            <option value="">Выберите...</option>
             {% for room in rooms %}
-            <tr>
-                <td>{{ room.name }}</td>
-                <td>{{ room.get_room_type_display }}</td>
-                <td>{{ room.capacity }}</td>
-                <td>{{ room.price }} руб</td>
-            </tr>
+            <option value="{{ room.id }}">{{ room.name }} - {{ room.price }} руб/час</option>
             {% endfor %}
-        </tbody>
-    </table>
-
-    <h3>Форма бронирования:</h3>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Отправить</button>
-    </form>
-</body>
-</html>
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Дата и время</label>
+        <input type="datetime-local" name="date" class="form-control" required>
+    </div>
+    
+    <div class="mb-3">
+        <label class="form-label">Способ оплаты</label>
+        <select name="payment" class="form-select" required>
+            <option value="">Выберите...</option>
+            <option value="cash">Наличные</option>
+            <option value="card">Банковская карта</option>
+            <option value="transfer">Безналичный перевод</option>
+        </select>
+    </div>
+    
+    <button type="submit" class="btn btn-primary w-100">Отправить</button>
+</form>
+{% endblock %}
